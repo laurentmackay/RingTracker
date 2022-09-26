@@ -1,5 +1,3 @@
-(* ::Package:: *)
-
 function [out1,out2,out3] = ginput(arg1)
 % GINPUT Graphical input from mouse.
 %   [X,Y] = GINPUT(N) gets N points from the current axes and returns 
