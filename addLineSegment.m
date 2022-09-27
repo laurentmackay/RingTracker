@@ -1,4 +1,4 @@
-function out = addLineSegment(app, ax, line, highlight_constructor, callback, varargin)
+function out = addLineSegment(app, ax, line, highlight, callback, varargin)
 
     function out = PtDragging(app, sz, callback)
         function inner(pt, evt)
@@ -12,9 +12,11 @@ function out = addLineSegment(app, ax, line, highlight_constructor, callback, va
         out=@inner;
     end
     width=0.5;
-    if nargin>3 && ~isempty(highlight_constructor)
-        highlight_with_line = highlight_constructor(app, {'LineWidth',width }, {'LineStyle','--'} );
-        highlight_no_line = highlight_constructor(app, {'LineWidth',width/4}, {'LineStyle','-'} );
+    if nargin>3 && ~isempty(highlight)
+        if length(highlight)==1
+            highlight={highlight, highlight};
+
+        end
     end
     
     function inner(app, event)
@@ -43,10 +45,10 @@ function out = addLineSegment(app, ax, line, highlight_constructor, callback, va
                 'Markersize',sz,'Deletable', false, varargin{:});
             app.(line) = roi;
 
-            if exist('highlight_no_line','var')
-                addlistener(app.(line), 'MovingROI', highlight_no_line);
-                addlistener(app.(line), 'ROIMoved', highlight_with_line);
-                highlight_with_line(roi, event);
+            if exist('highlight','var') && ~isempty(highlight)
+                addlistener(app.(line), 'MovingROI', highlight{1});
+                addlistener(app.(line), 'ROIMoved', highlight{2});
+                feval(highlight{2}, roi, event);
             end
 
             if exist('callback','var') && ~isempty(callback)
