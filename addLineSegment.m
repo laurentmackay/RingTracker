@@ -1,4 +1,4 @@
-function out = addLineSegment(app, ax, line, highlight, callback)
+function out = addLineSegment(app, ax, line, highlight_constructor, callback, varargin)
 
     function out = PtDragging(app, sz, callback)
         function inner(pt, evt)
@@ -12,9 +12,9 @@ function out = addLineSegment(app, ax, line, highlight, callback)
         out=@inner;
     end
     width=0.5;
-    if nargin>3 && ~isempty(highlight)
-        highlight_with_line = highlight(app, {'LineWidth',width }, {'LineStyle','--'} );
-        highlight_no_line = highlight(app, {'LineWidth',width/4}, {'LineStyle','-'} );
+    if nargin>3 && ~isempty(highlight_constructor)
+        highlight_with_line = highlight_constructor(app, {'LineWidth',width }, {'LineStyle','--'} );
+        highlight_no_line = highlight_constructor(app, {'LineWidth',width/4}, {'LineStyle','-'} );
     end
     
     function inner(app, event)
@@ -40,16 +40,16 @@ function out = addLineSegment(app, ax, line, highlight, callback)
         elseif length(app.TopDownPts)==1
              roi = drawline(app.(ax),'Position',[get(app.TopDownPts(1),'Position'); event.IntersectionPoint(1:2)], ...
                 'Color',color,'LineWidth', width,...
-                'Markersize',sz,'Deletable', false);
+                'Markersize',sz,'Deletable', false, varargin{:});
             app.(line) = roi;
 
             if exist('highlight_no_line','var')
-                addlistener(app.SpindleLine, 'MovingROI', highlight_no_line);
-                addlistener(app.SpindleLine, 'ROIMoved', highlight_with_line);
-                highlight_with_line(roi, event)
+                addlistener(app.(line), 'MovingROI', highlight_no_line);
+                addlistener(app.(line), 'ROIMoved', highlight_with_line);
+                highlight_with_line(roi, event);
             end
 
-            if exist('callback','var')
+            if exist('callback','var') && ~isempty(callback)
                 callback(app)
             end
 
